@@ -1,11 +1,11 @@
 [package]
 name = "vicash"
-version = "0.1.14"
+version = "1.0.0"
 edition = "2021"
 authors = ["caaatto"]
 license = "MIT"
 description = "vicash: low overhead capture card preview and LAN relay for streamers"
-repository = "https://github.com/caaatto/vicash"
+repository = "https://github.com/uwuleonie/CaptureCardStreamer"
 build = "build.rs"
 
 [[bin]]
@@ -57,10 +57,8 @@ default = []
 fast-jpeg = ["turbojpeg"]
 
 [build-dependencies]
-tiny-skia = "0.11"
 image = { version = "0.25", default-features = false, features = ["png"] }
 ico = "0.4"
-ab_glyph = "0.2"
 # Embeds the generated icon into vicash.exe. Uses rc.exe from the Windows SDK
 # on the MSVC toolchain and windres on the GNU toolchain, found automatically
 # instead of via hard coded paths.
