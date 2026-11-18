@@ -11,7 +11,9 @@ use std::io::Read;
 use std::path::PathBuf;
 use std::time::Duration;
 
-const REPO: &str = "caaatto/vicash";
+const REPO: &str = "uwuleonie/CaptureCardStreamer";
+/// Release asset the updater downloads (the portable exe, not the installer).
+const ASSET_NAME: &str = "CaptureCardStreamer-portable.exe";
 pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[derive(Debug, Clone)]
@@ -56,8 +58,8 @@ pub fn check_for_update() -> Result<Option<UpdateInfo>> {
     let exe = release
         .assets
         .iter()
-        .find(|a| a.name.eq_ignore_ascii_case("vicash.exe"))
-        .ok_or_else(|| anyhow!("release {} has no vicash.exe asset", release.tag_name))?;
+        .find(|a| a.name.eq_ignore_ascii_case(ASSET_NAME))
+        .ok_or_else(|| anyhow!("release {} has no {ASSET_NAME} asset", release.tag_name))?;
     log::info!("updater: {latest} available (running {CURRENT_VERSION})");
     Ok(Some(UpdateInfo {
         latest_version: latest.to_string(),

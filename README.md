@@ -1,3 +1,20 @@
+# CaptureCardStreamer
+
+Capture-Karten-Vorschau mit niedriger Latenz für Windows 10 und 11. Basiert auf [vicash](https://github.com/caaatto/vicash) von caaatto (MIT), angepasst für Windows 10.
+
+**[⬇ Download (neueste Version)](https://github.com/uwuleonie/CaptureCardStreamer/releases/latest)**: `CaptureCardStreamer-Setup-….exe` herunterladen und per Doppelklick installieren, oder `CaptureCardStreamer-portable.exe` direkt starten. Zeigt Windows „Der Computer wurde durch Windows geschützt“: „Weitere Informationen“, dann „Trotzdem ausführen“.
+
+Änderungen gegenüber vicash 0.1.14:
+- läuft ohne Visual C++ Redistributable (statisch gelinkte Laufzeit)
+- Grafik-Fallback DX12 → OpenGL → Software-Rendering, erzwingbar per `--backend dx12|gl` oder `VICASH_BACKEND`
+- Fehlermeldung statt stillem Beenden beim Start
+- startet auch ohne angeschlossene Capture-Karte und erkennt sie, sobald sie eingesteckt wird
+- Installer (Inno Setup), Updater zeigt auf dieses Repository
+
+---
+
+Die ursprüngliche vicash-Dokumentation folgt unten.
+
 # vicash
 
 Use your capture card as a second monitor for your console, without an actual second monitor. Single 10 MB exe, no installer, no setup. VIdeo CApture SHare.

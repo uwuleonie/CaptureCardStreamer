@@ -5,7 +5,13 @@ name: Build Windows installer
 on:
   push:
     branches: [main]
+    # Pushing a tag like v0.1.14 also publishes a GitHub Release with the
+    # setup file and a portable exe attached.
+    tags: ["v*"]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -37,7 +43,25 @@ jobs:
           $deps
           if ($deps -match "VCRUNTIME|api-ms-win-crt") { throw "exe still depends on the VC++ runtime" }
 
+      - name: Add portable exe
+        shell: pwsh
+        run: Copy-Item target\release\vicash.exe target\installer\CaptureCardStreamer-portable.exe
+
       - uses: actions/upload-artifact@v4
         with:
           name: CaptureCardStreamer-Setup
           path: target/installer/*.exe
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: CaptureCardStreamer ${{ github.ref_name }}
+          files: target/installer/*.exe
+          body: |
+            **Download:** `CaptureCardStreamer-Setup-*.exe` herunterladen und per Doppelklick installieren.
+            Alternativ `CaptureCardStreamer-portable.exe`: startet direkt ohne Installation.
+
+            Falls Windows "Der Computer wurde durch Windows geschuetzt" zeigt: auf "Weitere Informationen" und dann "Trotzdem ausfuehren" klicken (die Datei ist nicht signiert).
+
+            Basiert auf [vicash](https://github.com/caaatto/vicash) von caaatto (MIT-Lizenz), angepasst fuer Windows 10.
