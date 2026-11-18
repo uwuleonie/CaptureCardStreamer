@@ -1,0 +1,81 @@
+[package]
+name = "vicash"
+version = "0.1.14"
+edition = "2021"
+authors = ["caaatto"]
+license = "MIT"
+description = "vicash: low overhead capture card preview and LAN relay for streamers"
+repository = "https://github.com/caaatto/vicash"
+build = "build.rs"
+
+[[bin]]
+name = "vicash"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+bytemuck = { version = "1", features = ["derive"] }
+clap = { version = "4", features = ["derive"] }
+cpal = "0.15"
+dialoguer = { version = "0.11", default-features = false }
+directories = "5"
+egui = "0.30"
+egui-wgpu = "0.30"
+egui-winit = { version = "0.30", default-features = false, features = ["clipboard", "links"] }
+nokhwa = { version = "0.10", features = ["input-msmf", "input-native"] }
+pollster = "0.4"
+ringbuf = "0.4"
+serde = { version = "1", features = ["derive"] }
+sysinfo = { version = "0.32", default-features = false, features = ["system"] }
+toml = "0.8"
+wgpu = "23"
+winit = "0.30"
+tiny_http = "0.12"
+turbojpeg = { version = "1", optional = true }
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+parking_lot = "0.12"
+log = "0.4"
+env_logger = "0.11"
+ureq = { version = "2", default-features = false, features = ["tls"] }
+serde_json = "1"
+if-addrs = "0.13"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_Media", "Win32_System_Console", "Win32_Networking_WinSock", "Win32_UI_WindowsAndMessaging"] }
+windows = { version = "0.62", features = [
+    "Win32_Foundation",
+    "Win32_System_Com",
+    "Win32_System_Ole",
+    "Win32_System_Variant",
+    "Win32_Media",
+    "Win32_Media_MediaFoundation",
+    "Win32_Media_KernelStreaming",
+] }
+
+[features]
+default = []
+fast-jpeg = ["turbojpeg"]
+
+[build-dependencies]
+tiny-skia = "0.11"
+image = { version = "0.25", default-features = false, features = ["png"] }
+ico = "0.4"
+ab_glyph = "0.2"
+# Embeds the generated icon into vicash.exe. Uses rc.exe from the Windows SDK
+# on the MSVC toolchain and windres on the GNU toolchain, found automatically
+# instead of via hard coded paths.
+winresource = "0.1"
+
+[patch.crates-io]
+# Vendored copy of nokhwa-bindings-windows with one diff: the Media Foundation
+# source reader attribute MF_LOW_LATENCY is set to 1 before
+# MFCreateSourceReaderFromMediaSource. Saves about one to two frames of
+# buffering on capture cards that honour the hint.
+nokhwa-bindings-windows = { path = "vendor/nokhwa-bindings-windows" }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+opt-level = 3
+strip = true
+panic = "abort"

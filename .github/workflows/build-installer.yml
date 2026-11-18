@@ -1,0 +1,43 @@
+# Builds CaptureCardStreamer.exe on a Windows runner and packs it into a
+# single setup file (Inno Setup). Download it from the run's "Artifacts".
+name: Build Windows installer
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install Inno Setup if missing
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
+            choco install innosetup -y --no-progress
+          }
+
+      - name: Build exe and installer
+        shell: pwsh
+        run: ./installer/build-installer.ps1
+
+      - name: Check exe does not need the VC++ runtime
+        shell: pwsh
+        run: |
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+          $dumpbin = Get-ChildItem "$vs\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" | Select-Object -First 1
+          $deps = & $dumpbin.FullName /dependents target\release\vicash.exe
+          $deps
+          if ($deps -match "VCRUNTIME|api-ms-win-crt") { throw "exe still depends on the VC++ runtime" }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CaptureCardStreamer-Setup
+          path: target/installer/*.exe

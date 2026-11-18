@@ -1,0 +1,35 @@
+# Builds the release exe and packs it into a Windows installer.
+# Run from the project folder:
+#   powershell -ExecutionPolicy Bypass -File installer\build-installer.ps1
+# Result: target\installer\CaptureCardStreamer-Setup-<version>.exe
+
+$ErrorActionPreference = "Stop"
+$root = Split-Path -Parent $PSScriptRoot
+Set-Location $root
+
+Write-Host "==> cargo build --release" -ForegroundColor Cyan
+cargo build --release
+if ($LASTEXITCODE -ne 0) { throw "cargo build failed" }
+
+# Find the Inno Setup compiler (machine-wide, per-user, or on PATH).
+$candidates = @(
+    "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+    "$env:ProgramFiles\Inno Setup 6\ISCC.exe",
+    "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe"
+)
+$iscc = $candidates | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+if (-not $iscc) {
+    $cmd = Get-Command ISCC.exe -ErrorAction SilentlyContinue
+    if ($cmd) { $iscc = $cmd.Source }
+}
+if (-not $iscc) {
+    throw "Inno Setup 6 not found. Install it from https://jrsoftware.org/isdl.php (or: winget install JRSoftware.InnoSetup) and run this script again."
+}
+
+Write-Host "==> $iscc" -ForegroundColor Cyan
+& $iscc "installer\CaptureCardStreamer.iss"
+if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
+
+$setup = Get-ChildItem "target\installer\*.exe" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+Write-Host ""
+Write-Host "Fertig / Done: $($setup.FullName)" -ForegroundColor Green

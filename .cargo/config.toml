@@ -1,0 +1,9 @@
+# Link the MSVC C runtime statically so vicash.exe does not depend on
+# VCRUNTIME140.dll / api-ms-win-crt-*.dll. Without this the exe refuses to
+# start on Windows installs that lack the Visual C++ Redistributable, which
+# is common on fresh or trimmed-down Windows 10 machines.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.aarch64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
